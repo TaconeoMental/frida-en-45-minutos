@@ -14,6 +14,9 @@ import android.widget.Toast;
 import com.nivel4.Cipher.EncryptionUtils;
 import com.nivel4.httpClient.RequestPost;
 import com.nivel4.Cipher.EncryptDecrypt;
+import com.nivel4.RootChecker.rootChecker;
+import com.nivel4.RootChecker.ExitDialog;
+
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -47,119 +50,124 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
-        editTextUsername = findViewById(R.id.usernameEdit);
-        Button loginButton = findViewById(R.id.loginButton);
+        if (rootChecker.checkSu() || rootChecker.checkPackages() || rootChecker.testKeys()){
+            ExitDialog.showDialogAndExit(MainActivity.this, "Error!");
+        } else {
+            setContentView(R.layout.activity_main);
+            editTextUsername = findViewById(R.id.usernameEdit);
+            Button loginButton = findViewById(R.id.loginButton);
 
-        try {
-            clientKey = encryptDecrypt.generatePartialKey();
-            byte[] keyBytes = clientKey.getEncoded();
-            clientKeyStr = encryptionUtils.bytesToHex(keyBytes);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-
-        JSONObject jsonBody = new JSONObject();
-        try {
-            jsonBody.put("keyExchange", clientKeyStr);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        requestPost.requestPost(jsonBody, initURL, new RequestPost.CustomResponseCallback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        getErrorMessage("Error connecting to the URL");
-                    }
-                });
+            try {
+                clientKey = encryptDecrypt.generatePartialKey();
+                byte[] keyBytes = clientKey.getEncoded();
+                clientKeyStr = encryptionUtils.bytesToHex(keyBytes);
+            } catch (NoSuchAlgorithmException e) {
+                throw new RuntimeException(e);
             }
 
-            @Override
-            public void onResponse(JSONObject response) {
-                try {
-                    serverKeyStr = response.getString("keyExchange");
-                    encryptDecrypt.secretKey = encryptDecrypt.combineKeyParts(clientKeyStr, serverKeyStr);
+            JSONObject jsonBody = new JSONObject();
+            try {
+                jsonBody.put("keyExchange", clientKeyStr);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
 
-                } catch (JSONException e) {
-                    e.printStackTrace();
+            requestPost.requestPost(jsonBody, initURL, new RequestPost.CustomResponseCallback() {
+                @Override
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            getErrorMessage("Error connecting to the URL");
+                        }
+                    });
                 }
-            }
-        });
 
-        loginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String username = editTextUsername.getText().toString();
-                if (!username.isEmpty()) {
-                    JSONObject jsonBody = new JSONObject();
+                @Override
+                public void onResponse(JSONObject response) {
                     try {
-                        jsonBody.put("username", encryptDecrypt.encrypt(username, encryptDecrypt.secretKey));
-                        jsonBody.put("role", encryptDecrypt.encrypt("user", encryptDecrypt.secretKey));
-                        requestPost.requestPost(jsonBody, loginURL, new RequestPost.CustomResponseCallback() {
-                            @Override
-                            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        getErrorMessage("Error connecting to the URL");
-                                    }
-                                });
-                            }
+                        serverKeyStr = response.getString("keyExchange");
+                        encryptDecrypt.secretKey = encryptDecrypt.combineKeyParts(clientKeyStr, serverKeyStr);
 
-                            @Override
-                            public void onResponse(JSONObject response) {
-                                try {
-                                    String username = response.getString("username");
-                                    String role = response.getString("role");
-                                    String bio = response.getString("bio");
-                                    username = encryptDecrypt.decrypt(username, encryptDecrypt.secretKey);
-                                    role = encryptDecrypt.decrypt(role, encryptDecrypt.secretKey);
-                                    bio = encryptDecrypt.decrypt(bio, encryptDecrypt.secretKey);
-
-                                    // Create an intent to start ProfileActivity
-                                    Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
-                                    intent.putExtra("username", username);
-                                    intent.putExtra("role", role);
-                                    intent.putExtra("bio", bio);
-                                    startActivity(intent);
-                                    finish();
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                } catch (NoSuchPaddingException e) {
-                                    throw new RuntimeException(e);
-                                } catch (IllegalBlockSizeException e) {
-                                    throw new RuntimeException(e);
-                                } catch (NoSuchAlgorithmException e) {
-                                    throw new RuntimeException(e);
-                                } catch (BadPaddingException e) {
-                                    throw new RuntimeException(e);
-                                } catch (InvalidKeyException e) {
-                                    throw new RuntimeException(e);
-                                }
-                            }
-                        });
                     } catch (JSONException e) {
                         e.printStackTrace();
-                    } catch (NoSuchPaddingException e) {
-                        throw new RuntimeException(e);
-                    } catch (IllegalBlockSizeException e) {
-                        throw new RuntimeException(e);
-                    } catch (NoSuchAlgorithmException e) {
-                        throw new RuntimeException(e);
-                    } catch (BadPaddingException e) {
-                        throw new RuntimeException(e);
-                    } catch (InvalidKeyException e) {
-                        throw new RuntimeException(e);
                     }
-                } else {
-                    getErrorMessage("username is required");
                 }
-            }
-        });
+            });
+
+            loginButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    String username = editTextUsername.getText().toString();
+                    if (!username.isEmpty()) {
+                        JSONObject jsonBody = new JSONObject();
+                        try {
+                            jsonBody.put("username", encryptDecrypt.encrypt(username, encryptDecrypt.secretKey));
+                            jsonBody.put("role", encryptDecrypt.encrypt("user", encryptDecrypt.secretKey));
+                            requestPost.requestPost(jsonBody, loginURL, new RequestPost.CustomResponseCallback() {
+                                @Override
+                                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            getErrorMessage("Error connecting to the URL");
+                                        }
+                                    });
+                                }
+
+                                @Override
+                                public void onResponse(JSONObject response) {
+                                    try {
+                                        String username = response.getString("username");
+                                        String role = response.getString("role");
+                                        String bio = response.getString("bio");
+                                        username = encryptDecrypt.decrypt(username, encryptDecrypt.secretKey);
+                                        role = encryptDecrypt.decrypt(role, encryptDecrypt.secretKey);
+                                        bio = encryptDecrypt.decrypt(bio, encryptDecrypt.secretKey);
+
+                                        // Create an intent to start ProfileActivity
+                                        Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+                                        intent.putExtra("username", username);
+                                        intent.putExtra("role", role);
+                                        intent.putExtra("bio", bio);
+                                        startActivity(intent);
+                                        finish();
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    } catch (NoSuchPaddingException e) {
+                                        throw new RuntimeException(e);
+                                    } catch (IllegalBlockSizeException e) {
+                                        throw new RuntimeException(e);
+                                    } catch (NoSuchAlgorithmException e) {
+                                        throw new RuntimeException(e);
+                                    } catch (BadPaddingException e) {
+                                        throw new RuntimeException(e);
+                                    } catch (InvalidKeyException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                }
+                            });
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        } catch (NoSuchPaddingException e) {
+                            throw new RuntimeException(e);
+                        } catch (IllegalBlockSizeException e) {
+                            throw new RuntimeException(e);
+                        } catch (NoSuchAlgorithmException e) {
+                            throw new RuntimeException(e);
+                        } catch (BadPaddingException e) {
+                            throw new RuntimeException(e);
+                        } catch (InvalidKeyException e) {
+                            throw new RuntimeException(e);
+                        }
+                    } else {
+                        getErrorMessage("username is required");
+                    }
+                }
+            });
+
+        }
 
     }
 
