@@ -43,5 +43,5 @@ apply from: "utils.gradle"
 android {
     defaultConfig {
         buildConfigField 'String', 'INIT_ENDPOINT', toJavaCodeString(INIT_ENDPOINT)
-        buildConfigField 'String', 'GETINFO_ENDPOINT', toJavaCodeString(GETINFO_ENDPOINT)
+        buildConfigField 'String', 'GETUSER_ENDPOINT', toJavaCodeString(GETUSER_ENDPOINT)
     }}

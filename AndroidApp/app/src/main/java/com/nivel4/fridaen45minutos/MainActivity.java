@@ -24,6 +24,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.UUID;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -35,11 +36,11 @@ import okhttp3.Call;
 public class MainActivity extends AppCompatActivity {
 
     public static final String INIT_ENDPOINT = BuildConfig.INIT_ENDPOINT;
-    public static final String GETINFO_ENDPOINT = BuildConfig.GETINFO_ENDPOINT;
+    public static final String GETUSER_ENDPOINT = BuildConfig.GETUSER_ENDPOINT;
     RequestPost requestPost = new RequestPost();
     EncryptDecrypt encryptDecrypt = new EncryptDecrypt();
     EncryptionUtils encryptionUtils = new EncryptionUtils();
-    String loginURL = GETINFO_ENDPOINT;
+    String loginURL = GETUSER_ENDPOINT;
     String initURL = INIT_ENDPOINT;
     TextView textView;
     EditText editTextUsername;
@@ -58,6 +59,9 @@ public class MainActivity extends AppCompatActivity {
             editTextUsername = findViewById(R.id.usernameEdit);
             Button loginButton = findViewById(R.id.loginButton);
 
+            UUID uuid = UUID.randomUUID();
+            String uuidStr = uuid.toString();
+
             try {
                 clientKey = encryptDecrypt.generatePartialKey();
                 byte[] keyBytes = clientKey.getEncoded();
@@ -69,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
             JSONObject jsonBody = new JSONObject();
             try {
                 jsonBody.put("keyExchange", clientKeyStr);
+                jsonBody.put("uuid", uuidStr);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -105,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
                         try {
                             jsonBody.put("username", encryptDecrypt.encrypt(username, encryptDecrypt.secretKey));
                             jsonBody.put("role", encryptDecrypt.encrypt("user", encryptDecrypt.secretKey));
+                            jsonBody.put("uuid", uuidStr);
                             requestPost.requestPost(jsonBody, loginURL, new RequestPost.CustomResponseCallback() {
                                 @Override
                                 public void onFailure(@NonNull Call call, @NonNull IOException e) {
