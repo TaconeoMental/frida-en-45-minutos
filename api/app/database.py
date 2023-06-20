@@ -31,6 +31,9 @@ def init_db():
                          bio       TEXT
                  );''')
 
+    # Usuario prueba
+    #db.execute("INSERT into users (username, age, lastlogin, bio) VALUES('mateo', 22, 23, 'sdgfsgsgff')")
+
     db.execute('''CREATE TABLE sessions(
                          uuid   TEXT PRIMARY KEY,
                          symkey TEXT NOT NULL
@@ -51,8 +54,8 @@ def save_session(uuid, symkey):
 def get_user(username, role):
     db = Database()
     res = db.execute("SELECT username, age, lastlogin, bio FROM users WHERE username=?", (username,))
-    print(res)
     if not (res := res.fetchone()):
         # No existe
         return None
-    user = res[0]
+    user_attrs = ["username", "age", "lastlogin", "bio"]
+    return dict(zip(user_attrs, [str(e) for e in res]))
