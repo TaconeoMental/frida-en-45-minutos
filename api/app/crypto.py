@@ -53,4 +53,6 @@ class Cipher:
         return d
 
     def decrypt_dict(self, d):
-        pass
+        for key in d:
+            d[key] = self.decrypt(d[key])
+        return d

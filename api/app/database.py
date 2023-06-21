@@ -52,10 +52,12 @@ def save_session(uuid, symkey):
     db.execute("INSERT into sessions (uuid, symkey) VALUES(?, ?)", (uuid, symkey))
 
 def get_user(username, role):
-    db = Database()
-    res = db.execute("SELECT username, age, lastlogin, bio FROM users WHERE username=?", (username,))
-    if not (res := res.fetchone()):
-        # No existe
-        return None
     user_attrs = ["username", "age", "lastlogin", "bio"]
-    return dict(zip(user_attrs, [str(e) for e in res]))
+    if role != "ADMIN":
+        values = [username] + ["***"] * 3
+    else:
+        db = Database()
+        res = db.execute("SELECT username, age, lastlogin, bio FROM users WHERE username=?", (username,))
+        if not (values := res.fetchone()): # No existe
+            return None
+    return dict(zip(user_attrs, [str(e) for e in values]))

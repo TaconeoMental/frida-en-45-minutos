@@ -30,7 +30,9 @@ WORKDIR $WEBAPP_DIR
 COPY --chown=webapp:webapp ./app .
 
 # Python
-RUN python3 -m pip install -r app/requirements.txt
+# Es un docker, no me importa separar paquetes de sistema y de usuario
+RUN python3 -m pip install -r requirements.txt --break-system-packages
+ENV PATH="/home/webapp/.local/bin:${PATH}"
 
 # Ahora se viene lo chido
 COPY ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
