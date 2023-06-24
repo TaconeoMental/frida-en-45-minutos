@@ -6,10 +6,12 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -88,12 +90,33 @@ public class ProfileActivity extends AppCompatActivity {
         ticket2TextView.setText(ticket2);
         ticket3TextView.setText(ticket3);
 
+        LinearLayout ticket1Layout = findViewById(R.id.ticket1Layout);
+        LinearLayout ticket2Layout = findViewById(R.id.ticket2Layout);
+        LinearLayout ticket3Layout = findViewById(R.id.ticket3Layout);
+
+        Drawable roundedRectangle = getResources().getDrawable(R.drawable.rounded_rectangle);
+        ticket1Layout.setBackground(roundedRectangle);
+        ticket2Layout.setBackground(roundedRectangle);
+        ticket3Layout.setBackground(roundedRectangle);
+
+
+
         Button btnPassChange = findViewById(R.id.btnPassChange);
         btnPassChange.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 PasswordChange dialogFragment = new PasswordChange();
                 dialogFragment.show(getSupportFragmentManager(), "passwordChangeDialog");
+                closeDrawer();
+            }
+        });
+
+        Button btnAbout = findViewById(R.id.btnAbout);
+        btnAbout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                About dialogFragment = new About();
+                dialogFragment.show(getSupportFragmentManager(), "aboutDialog");
                 closeDrawer();
             }
         });

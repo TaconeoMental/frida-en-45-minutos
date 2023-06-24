@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/menu_change_password"
-        android:title="Change Password" />
+        android:title="Change Password"/>
     <item
         android:id="@+id/menu_logout"
         android:title="Logout" />
