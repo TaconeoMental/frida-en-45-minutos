@@ -27,6 +27,15 @@
         android:id="@+id/usernameEdit"
     />
 
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="password"
+        android:textSize="20sp"
+        android:inputType="text"
+        android:id="@+id/passwordEdit"
+        />
+
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

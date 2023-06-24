@@ -43,5 +43,9 @@ apply from: "utils.gradle"
 android {
     defaultConfig {
         buildConfigField 'String', 'INIT_ENDPOINT', toJavaCodeString(INIT_ENDPOINT)
+        buildConfigField 'String', 'LOGIN_ENDPOINT', toJavaCodeString(LOGIN_ENDPOINT)
+        buildConfigField 'String', 'LOGOUT_ENDPOINT', toJavaCodeString(LOGOUT_ENDPOINT)
+        buildConfigField 'String', 'PASSCHANGE_ENDPOINT', toJavaCodeString(PASSCHANGE_ENDPOINT)
+        buildConfigField 'String', 'SENDTICKET_ENDPOINT', toJavaCodeString(SENDTICKET_ENDPOINT)
         buildConfigField 'String', 'GETUSER_ENDPOINT', toJavaCodeString(GETUSER_ENDPOINT)
     }}

@@ -3,6 +3,8 @@ package com.nivel4.Cipher;
 import static com.nivel4.Cipher.EncryptionUtils.concatArrays;
 import static com.nivel4.Cipher.EncryptionUtils.hexToBytes;
 
+import android.util.Log;
+
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -22,7 +24,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class EncryptDecrypt {
 
-    public SecretKey secretKey;
+    public static SecretKey secretKey;
 
     public static String encrypt(String plaintext, SecretKey secretKey) throws NoSuchAlgorithmException, NoSuchPaddingException,
             InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException {
@@ -52,12 +54,12 @@ public class EncryptDecrypt {
         return truncatedKey;
     }
 
-    public static SecretKey combineKeyParts(String clientKeyPart, String serverKeyPart) {
-        byte[] clientKeyBytes = hexToBytes(clientKeyPart);
-        byte[] serverKeyBytes = hexToBytes(serverKeyPart);
-        byte[] combinedKeyBytes = concatArrays(clientKeyBytes, serverKeyBytes);
-        SecretKey secretKey = new SecretKeySpec(combinedKeyBytes, "DESede");
+    public static SecretKey setSecretKey(String serverKeyStr) {
+        byte[] serverKeyBytes = hexToBytes(serverKeyStr);
+        SecretKey secretKey = new SecretKeySpec(serverKeyBytes, "DESede");
         return secretKey;
     }
+
+
 
 }

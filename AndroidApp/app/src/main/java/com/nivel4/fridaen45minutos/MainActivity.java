@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -12,11 +13,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.nivel4.Cipher.EncryptionUtils;
-import com.nivel4.httpClient.RequestPost;
 import com.nivel4.Cipher.EncryptDecrypt;
-import com.nivel4.RootChecker.rootChecker;
 import com.nivel4.RootChecker.ExitDialog;
-
+import com.nivel4.RootChecker.rootChecker;
+import com.nivel4.httpClient.RequestPost;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -35,56 +35,120 @@ import okhttp3.Call;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static final String INIT_ENDPOINT = BuildConfig.INIT_ENDPOINT;
-    public static final String GETUSER_ENDPOINT = BuildConfig.GETUSER_ENDPOINT;
-    RequestPost requestPost = new RequestPost();
-    EncryptDecrypt encryptDecrypt = new EncryptDecrypt();
-    EncryptionUtils encryptionUtils = new EncryptionUtils();
-    String loginURL = GETUSER_ENDPOINT;
-    String initURL = INIT_ENDPOINT;
-    TextView textView;
-    EditText editTextUsername;
-    String serverKeyStr;
-    String clientKeyStr;
-    SecretKey clientKey;
+    private static final String INIT_ENDPOINT = BuildConfig.INIT_ENDPOINT;
+    private static final String LOGIN_ENDPOINT = BuildConfig.LOGIN_ENDPOINT;
+    private static final String GETUSER_ENDPOINT = BuildConfig.GETUSER_ENDPOINT;
+
+    private RequestPost requestPost;
+    private EncryptDecrypt encryptDecrypt;
+    private EncryptionUtils encryptionUtils;
+
+    private TextView textView;
+    private EditText editTextUsername;
+    private EditText editTextPassword;
+    private String serverKeyStr;
+    private String clientKeyStr;
+    private SecretKey clientKey;
+    private String token = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (rootChecker.checkSu() || rootChecker.checkPackages() || rootChecker.testKeys()){
+
+        if (!isRootedDevice()) {
             ExitDialog.showDialogAndExit(MainActivity.this, "Error!");
         } else {
             setContentView(R.layout.activity_main);
-            editTextUsername = findViewById(R.id.usernameEdit);
-            Button loginButton = findViewById(R.id.loginButton);
+            initializeViews();
+            requestPost = new RequestPost();
+            encryptDecrypt = new EncryptDecrypt();
+            encryptionUtils = new EncryptionUtils();
+            initExchange();
+        }
+    }
 
-            UUID uuid = UUID.randomUUID();
-            String uuidStr = uuid.toString();
+    private boolean isRootedDevice() {
+        return rootChecker.checkSu() || rootChecker.checkPackages() || rootChecker.testKeys();
+    }
 
-            try {
-                clientKey = encryptDecrypt.generatePartialKey();
-                byte[] keyBytes = clientKey.getEncoded();
-                clientKeyStr = encryptionUtils.bytesToHex(keyBytes);
-            } catch (NoSuchAlgorithmException e) {
-                throw new RuntimeException(e);
+    private void initializeViews() {
+        editTextUsername = findViewById(R.id.usernameEdit);
+        editTextPassword = findViewById(R.id.passwordEdit);
+        Button loginButton = findViewById(R.id.loginButton);
+
+        loginButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String username = editTextUsername.getText().toString();
+                String password = editTextPassword.getText().toString();
+                if (serverKeyStr == null) {
+                    initExchange();
+                } else {
+                    if (!username.isEmpty() && !password.isEmpty()) {
+                        doLogin(username, password);
+                    } else {
+                        showErrorMessage("Username and password are required");
+                    }
+                }
+            }
+        });
+    }
+
+    private void initExchange() {
+        try {
+            clientKey = encryptDecrypt.generatePartialKey();
+            byte[] keyBytes = clientKey.getEncoded();
+            clientKeyStr = encryptionUtils.bytesToHex(keyBytes);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+
+        JSONObject jsonBody = new JSONObject();
+        try {
+            jsonBody.put("auth", clientKeyStr);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        requestPost.requestPost(jsonBody, INIT_ENDPOINT, new RequestPost.CustomResponseCallback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        showErrorMessage(e.getMessage());
+                    }
+                });
             }
 
-            JSONObject jsonBody = new JSONObject();
-            try {
-                jsonBody.put("keyExchange", clientKeyStr);
-                jsonBody.put("uuid", uuidStr);
-            } catch (JSONException e) {
-                e.printStackTrace();
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    if (response.getString("status").equals("OK")) {
+                        serverKeyStr = response.getString("key");
+                        encryptDecrypt.secretKey = encryptDecrypt.setSecretKey(serverKeyStr);
+                        token = response.getString("token");
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
+        });
+    }
 
-            requestPost.requestPost(jsonBody, initURL, new RequestPost.CustomResponseCallback() {
+    private void doLogin(String username, String password) {
+        JSONObject jsonBody = new JSONObject();
+        try {
+            jsonBody.put("username", encryptDecrypt.encrypt(username, encryptDecrypt.secretKey));
+            jsonBody.put("password", encryptDecrypt.encrypt(password, encryptDecrypt.secretKey));
+            requestPost.requestPostAuth(token, jsonBody, LOGIN_ENDPOINT, new RequestPost.CustomResponseCallback() {
                 @Override
                 public void onFailure(@NonNull Call call, @NonNull IOException e) {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            getErrorMessage("Error connecting to the URL");
+                            showErrorMessage(e.getMessage());
                         }
                     });
                 }
@@ -92,92 +156,73 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onResponse(JSONObject response) {
                     try {
-                        serverKeyStr = response.getString("keyExchange");
-                        encryptDecrypt.secretKey = encryptDecrypt.combineKeyParts(clientKeyStr, serverKeyStr);
-
+                        if (response.getString("status").equals("OK")) {
+                            doGetUser(username);
+                        }
                     } catch (JSONException e) {
+                        e.printStackTrace();
+                        showErrorMessage("Error parsing response");
+                    }
+                }
+            });
+        } catch (JSONException | NoSuchPaddingException | IllegalBlockSizeException |
+                 NoSuchAlgorithmException | BadPaddingException | InvalidKeyException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void doGetUser(String username) {
+        if (!token.isEmpty()) {
+            JSONObject jsonBody = new JSONObject();
+            try {
+                jsonBody.put("username", encryptDecrypt.encrypt(username, encryptDecrypt.secretKey));
+            } catch (JSONException | NoSuchAlgorithmException | NoSuchPaddingException |
+                     InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
+                throw new RuntimeException(e);
+            }
+            requestPost.requestPostAuth(token, jsonBody, GETUSER_ENDPOINT, new RequestPost.CustomResponseCallback() {
+                @Override
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            showErrorMessage(e.getMessage());
+                        }
+                    });
+                }
+
+                @Override
+                public void onResponse(JSONObject response) {
+                    try {
+                            String username = response.getString("username");
+                            String role = response.getString("role");
+                            JSONObject tickets = response.getJSONObject("tickets");
+
+                            username = encryptDecrypt.decrypt(username, encryptDecrypt.secretKey);
+                            role = encryptDecrypt.decrypt(role, encryptDecrypt.secretKey);
+                            String ticket1 = encryptDecrypt.decrypt(tickets.getString("ticket1"), encryptDecrypt.secretKey);
+                            String ticket2 = encryptDecrypt.decrypt(tickets.getString("ticket2"), encryptDecrypt.secretKey);
+                            String ticket3 = encryptDecrypt.decrypt(tickets.getString("ticket3"), encryptDecrypt.secretKey);
+
+                            Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+                            intent.putExtra("serverKeyStr", serverKeyStr);
+                            intent.putExtra("username", username);
+                            intent.putExtra("token", token);
+                            intent.putExtra("role", role);
+                            intent.putExtra("ticket1", ticket1);
+                            intent.putExtra("ticket2", ticket2);
+                            intent.putExtra("ticket3", ticket3);
+                            startActivity(intent);
+                            finish();
+                    } catch (JSONException | NoSuchPaddingException | IllegalBlockSizeException |
+                             NoSuchAlgorithmException | BadPaddingException | InvalidKeyException e) {
                         e.printStackTrace();
                     }
                 }
             });
-
-            loginButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    String username = editTextUsername.getText().toString();
-                    if (!username.isEmpty()) {
-                        JSONObject jsonBody = new JSONObject();
-                        try {
-                            jsonBody.put("username", encryptDecrypt.encrypt(username, encryptDecrypt.secretKey));
-                            jsonBody.put("role", encryptDecrypt.encrypt("user", encryptDecrypt.secretKey));
-                            jsonBody.put("uuid", uuidStr);
-                            requestPost.requestPost(jsonBody, loginURL, new RequestPost.CustomResponseCallback() {
-                                @Override
-                                public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                                    runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            getErrorMessage("Error connecting to the URL");
-                                        }
-                                    });
-                                }
-
-                                @Override
-                                public void onResponse(JSONObject response) {
-                                    try {
-                                        String username = response.getString("username");
-                                        String role = response.getString("role");
-                                        String bio = response.getString("bio");
-                                        username = encryptDecrypt.decrypt(username, encryptDecrypt.secretKey);
-                                        role = encryptDecrypt.decrypt(role, encryptDecrypt.secretKey);
-                                        bio = encryptDecrypt.decrypt(bio, encryptDecrypt.secretKey);
-
-                                        // Create an intent to start ProfileActivity
-                                        Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
-                                        intent.putExtra("username", username);
-                                        intent.putExtra("role", role);
-                                        intent.putExtra("bio", bio);
-                                        startActivity(intent);
-                                        finish();
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    } catch (NoSuchPaddingException e) {
-                                        throw new RuntimeException(e);
-                                    } catch (IllegalBlockSizeException e) {
-                                        throw new RuntimeException(e);
-                                    } catch (NoSuchAlgorithmException e) {
-                                        throw new RuntimeException(e);
-                                    } catch (BadPaddingException e) {
-                                        throw new RuntimeException(e);
-                                    } catch (InvalidKeyException e) {
-                                        throw new RuntimeException(e);
-                                    }
-                                }
-                            });
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        } catch (NoSuchPaddingException e) {
-                            throw new RuntimeException(e);
-                        } catch (IllegalBlockSizeException e) {
-                            throw new RuntimeException(e);
-                        } catch (NoSuchAlgorithmException e) {
-                            throw new RuntimeException(e);
-                        } catch (BadPaddingException e) {
-                            throw new RuntimeException(e);
-                        } catch (InvalidKeyException e) {
-                            throw new RuntimeException(e);
-                        }
-                    } else {
-                        getErrorMessage("username is required");
-                    }
-                }
-            });
-
         }
-
     }
-
-    private void getErrorMessage(CharSequence toastText) {
+    private void showErrorMessage(CharSequence toastText) {
         Toast.makeText(MainActivity.this, toastText, Toast.LENGTH_SHORT).show();
     }
 }
