@@ -1,4 +1,0 @@
-Flask==2.3.2
-requests==2.25.1
-gunicorn==20.1.0
-pycryptodome

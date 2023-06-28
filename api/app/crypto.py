@@ -4,27 +4,38 @@ import base64
 from Crypto.Cipher import DES3
 from Crypto.Util.Padding import pad, unpad
 
-from database import Database
+import app.utils as utils
+import app.database as database
+from app.models import Session
+
+from . import db
 
 MAIN_KEY_BYTES = 24
 PARTIAL_KEY_BYTES = MAIN_KEY_BYTES // 2
 
-def gen_partial_key():
-    key_bytes = secrets.token_bytes(PARTIAL_KEY_BYTES)
-    return key_bytes
+# Helpers
 
-def create_session_key(uuid, client_key):
-    # Generamos la llave de la forma más insegura posible :P
-    partial_key = gen_partial_key()
-    shared_bytes = client_key + partial_key
+def create_partial_key():
+    return secrets.token_hex(PARTIAL_KEY_BYTES)
+
+def is_valid_key(key, partial=False):
+    length = PARTIAL_KEY_BYTES if partial else MAIN_KEY_BYTES
+    return utils.is_hex(key) and len(bytes.fromhex(key)) == length
+
+
+# Genera una llave simétrica, la guarda en la db y devuelve el objeto de sesión
+# asociado
+def create_session(client_key, server_key):
+    # Generamos la llave de la forma más insegura posible
+    shared_bytes = bytes.fromhex(client_key + server_key)
     shared_key = DES3.adjust_key_parity(shared_bytes).hex()
-    #shared_key = hashlib.sha1(shared_bytes).hexdigest()
+    #shared_key = hashlib.sha1(shared_bytes).hexdigest()[:24]
 
-    # la guardamos en la db
-    db = Database()
-    db.execute("REPLACE into sessions (uuid, symkey) VALUES(?, ?)", (uuid, shared_key))
-
-    return shared_key
+    # Creamos y guardamos la sesión
+    session = Session(shared_key)
+    db.session.add(session)
+    db.session.commit()
+    return session
 
 class Cipher:
     def __init__(self, secret_key):
@@ -48,11 +59,18 @@ class Cipher:
         return plaintext
 
     def encrypt_dict(self, d):
-        for key in d:
-            d[key] = self.encrypt(d[key])
-        return d
+        return {k: self.encrypt(v) for k, v in d.items()}
 
     def decrypt_dict(self, d):
-        for key in d:
-            d[key] = self.decrypt(d[key])
-        return d
+        return {k: self.decrypt(v) for k, v in d.items()}
+
+    # Genera una respuesta HTTP cifrada. Esta consiste de un código de estado y un objeto
+    # JSON. Este tiene una descripción del código de estado, un mensaje opcional y
+    # los valores que se quieran enviar.
+    def build_response(status_code, val_dict=None, msg=None):
+        values = val_dict or {}
+        response_msg = {"msg": msg} if msg else {}
+
+        status_text = utils.status_code_text(status_code)
+        response_dict = {"status": status_text} | response_msg | values
+        return self.encrypt_dict(response_dict), status_code
