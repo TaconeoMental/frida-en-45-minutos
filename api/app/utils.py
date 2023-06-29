@@ -11,6 +11,9 @@ def status_code_text(status):
         return "OK"
     return "NOK"
 
-def basic_response(status_code, msg=None):
+def basic_response(status_code, msg=None, values=None):
+    if not values:
+        values = {}
     message = {"msg": msg} if msg else {}
-    return {"status": status_code_text(status_code)} | message, status_code
+    base_response = {"status": status_code_text(status_code)}
+    return base_response | message | values, status_code

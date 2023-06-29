@@ -4,10 +4,8 @@ from flask import Flask
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)
 
 app_settings = os.getenv(
     'APP_SETTINGS',
@@ -20,8 +18,11 @@ bcrypt = Bcrypt(app)
 migrate = Migrate(app, db)
 
 with app.app_context():
-    from app.models import Session
+    from app.database.models import Session, User
     db.create_all()
+
+    from app.database.populate_users import load_data
+    load_data(db)
 
 from .auth.routes import main as main_blueprint
 app.register_blueprint(main_blueprint)

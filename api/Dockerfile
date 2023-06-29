@@ -27,7 +27,8 @@ USER webapp
 ENV WEBAPP_DIR /home/webapp/feccm
 RUN mkdir -p $WEBAPP_DIR
 WORKDIR $WEBAPP_DIR
-COPY --chown=webapp:webapp ./app .
+COPY --chown=webapp:webapp ./app ./app
+COPY ./requirements.txt .
 
 # Python
 # Es un docker, no me importa separar paquetes de sistema y de usuario

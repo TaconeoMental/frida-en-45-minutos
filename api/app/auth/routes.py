@@ -1,64 +1,95 @@
 from flask import Flask, request, Response
 from flask import Blueprint
 
-from app import db
+from app import db, bcrypt
 import app.crypto as crypto
 import app.utils as utils
-from .helpers import requires_token
+from app.database.models import Session, User
+from .helpers import requires_token, handles_server_error
 
 
 main = Blueprint('main', __name__)
 
 @main.route("/init", methods=["POST"])
+@handles_server_error
 def handle_init():
     content = request.get_json(silent=True)
     client_key = content.get("auth")
 
     if not client_key or not crypto.is_valid_key(client_key, partial=True):
-        return utils.basic_response(400)
+        return utils.basic_response(400, "Invalid partial key")
 
     server_key = crypto.create_partial_key()
     session = crypto.create_session(client_key, server_key)
 
     token = session.gen_token()
 
-    status_code = 200
-    return {
-        "status": utils.status_code_text(status_code),
+    return utils.basic_response(200, values={
         "key": server_key,
         "token": token
-    }, status_code
+    })
 
-
-@main.route("/getuser", methods=["POST"])
-@requires_token
-def handle_getuser(uuid):
-    """
+# Osi muchos decoradores gracias gracias
+@main.route("/login", methods=["POST"])
+@requires_token(authenticated=False)
+@handles_server_error
+def handle_login(uuid):
     content = request.get_json(silent=True)
 
-    client_uuid = content.get("uuid")
     enc_username = content.get("username")
-    enc_role = content.get("role")
+    enc_password = content.get("password")
 
-    if not all([client_uuid, enc_username, enc_role]):
+    session = Session.query.filter_by(
+        uuid=uuid
+    ).first()
+
+    if not all([enc_username, enc_password, session]):
         return utils.basic_response(400)
 
-    shared_key = database.get_shared_key(client_uuid)
-    if not shared_key:
-        return Response(status=404)
-
-    cipher = crypto.Cipher(shared_key)
+    shared_key = session.shared_key
+    print(shared_key)
+    cipher = crypto.Cipher(bytes.fromhex(shared_key))
 
     dec_username = cipher.decrypt(enc_username)
-    dec_role = cipher.decrypt(enc_role)
+    dec_password = cipher.decrypt(enc_password)
 
-    user_result = database.get_user(dec_username, dec_role)
-    if not user_result:
-        return utils.basic_response(400, "User not found")
+    user = User.query.filter_by(
+        username=dec_username
+    ).first()
 
-    return cipher.build_response(200, user_results)
-    """
-    return "getuser"
+    if not (user and bcrypt.check_password_hash(user.password, dec_password)):
+        return utils.basic_response(401, "Los datos ingresados no son correctos")
 
-if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=8080)
+    # Asociamos la sesión al usuario
+    user.sessions.append(session)
+    db.session.commit()
+
+    return utils.basic_response(200)
+
+@main.route("/changepass", methods=["POST"])
+@requires_token(authenticated=True)
+@handles_server_error
+def handle_changepass(uuid):
+    content = request.get_json(silent=True)
+
+    enc_username = content.get("username")
+    enc_password = content.get("password")
+
+    session = Session.query.filter_by(
+        uuid=uuid
+    ).first()
+
+    if not all([enc_username, enc_password, session]):
+        return utils.basic_response(400)
+
+    shared_key = session.shared_key
+    cipher = crypto.Cipher(bytes.fromhex(shared_key))
+
+    dec_username = cipher.decrypt(enc_username)
+    dec_password = cipher.decrypt(enc_password)
+
+    session.user.set_password(dec_password)
+    db.session.commit()
+
+    return utils.basic_response(200, msg=f"Se han actualizado los datos de '{dec_username}'")
+

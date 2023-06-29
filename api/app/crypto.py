@@ -5,15 +5,14 @@ from Crypto.Cipher import DES3
 from Crypto.Util.Padding import pad, unpad
 
 import app.utils as utils
-import app.database as database
-from app.models import Session
+from app.database.models import Session
 
 from . import db
 
 MAIN_KEY_BYTES = 24
 PARTIAL_KEY_BYTES = MAIN_KEY_BYTES // 2
 
-# Helpers
+# Helpers...
 
 def create_partial_key():
     return secrets.token_hex(PARTIAL_KEY_BYTES)
@@ -65,12 +64,14 @@ class Cipher:
         return {k: self.decrypt(v) for k, v in d.items()}
 
     # Genera una respuesta HTTP cifrada. Esta consiste de un código de estado y un objeto
-    # JSON. Este tiene una descripción del código de estado, un mensaje opcional y
-    # los valores que se quieran enviar.
+    # JSON. Este último, por su parte, contiene una descripción del código de estado, un
+    # mensaje opcional y los valores que se quieran enviar.
     def build_response(status_code, val_dict=None, msg=None):
         values = val_dict or {}
         response_msg = {"msg": msg} if msg else {}
 
         status_text = utils.status_code_text(status_code)
-        response_dict = {"status": status_text} | response_msg | values
-        return self.encrypt_dict(response_dict), status_code
+        response_dict = {"status": status_text} \
+                        | response_msg \
+                        | self.encrypt_dict(values)
+        return response_dict, status_code
