@@ -155,14 +155,12 @@ public class MainActivity extends AppCompatActivity {
 
                 @Override
                 public void onResponse(JSONObject response) {
-                    try {
-                        if (response.getString("status").equals("OK")) {
-                            doGetUser(username);
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        showErrorMessage("Error parsing response");
-                    }
+                    Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+                    intent.putExtra("serverKeyStr", serverKeyStr);
+                    intent.putExtra("username", username);
+                    intent.putExtra("token", token);
+                    startActivity(intent);
+                    finish();
                 }
             });
         } catch (JSONException | NoSuchPaddingException | IllegalBlockSizeException |
@@ -171,57 +169,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void doGetUser(String username) {
-        if (!token.isEmpty()) {
-            JSONObject jsonBody = new JSONObject();
-            try {
-                jsonBody.put("username", encryptDecrypt.encrypt(username, encryptDecrypt.secretKey));
-            } catch (JSONException | NoSuchAlgorithmException | NoSuchPaddingException |
-                     InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
-                throw new RuntimeException(e);
-            }
-            requestPost.requestPostAuth(token, jsonBody, GETUSER_ENDPOINT, new RequestPost.CustomResponseCallback() {
-                @Override
-                public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            showErrorMessage(e.getMessage());
-                        }
-                    });
-                }
-
-                @Override
-                public void onResponse(JSONObject response) {
-                    try {
-                            String username = response.getString("username");
-                            String role = response.getString("role");
-                            JSONObject tickets = response.getJSONObject("tickets");
-
-                            username = encryptDecrypt.decrypt(username, encryptDecrypt.secretKey);
-                            role = encryptDecrypt.decrypt(role, encryptDecrypt.secretKey);
-                            String ticket1 = encryptDecrypt.decrypt(tickets.getString("ticket1"), encryptDecrypt.secretKey);
-                            String ticket2 = encryptDecrypt.decrypt(tickets.getString("ticket2"), encryptDecrypt.secretKey);
-                            String ticket3 = encryptDecrypt.decrypt(tickets.getString("ticket3"), encryptDecrypt.secretKey);
-
-                            Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
-                            intent.putExtra("serverKeyStr", serverKeyStr);
-                            intent.putExtra("username", username);
-                            intent.putExtra("token", token);
-                            intent.putExtra("role", role);
-                            intent.putExtra("ticket1", ticket1);
-                            intent.putExtra("ticket2", ticket2);
-                            intent.putExtra("ticket3", ticket3);
-                            startActivity(intent);
-                            finish();
-                    } catch (JSONException | NoSuchPaddingException | IllegalBlockSizeException |
-                             NoSuchAlgorithmException | BadPaddingException | InvalidKeyException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-        }
-    }
     private void showErrorMessage(CharSequence toastText) {
         Toast.makeText(MainActivity.this, toastText, Toast.LENGTH_SHORT).show();
     }

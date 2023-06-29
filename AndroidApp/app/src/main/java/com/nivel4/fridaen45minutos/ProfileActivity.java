@@ -8,6 +8,8 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -19,24 +21,12 @@ import com.google.android.material.navigation.NavigationView;
 import com.nivel4.Cipher.EncryptDecrypt;
 import com.nivel4.RootChecker.rootChecker;
 import com.nivel4.RootChecker.ExitDialog;
-import com.nivel4.httpClient.RequestPost;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
+public class ProfileActivity extends AppCompatActivity implements ApiMethods.UserDataCallback, SendTicket.SendTicketListener {
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-
-import okhttp3.Call;
-
-public class ProfileActivity extends AppCompatActivity {
-
-    RequestPost requestPost = new RequestPost();
     EncryptDecrypt encryptDecrypt = new EncryptDecrypt();
     public static final String LOGOUT_ENDPOINT = BuildConfig.LOGOUT_ENDPOINT;
     static String username;
@@ -48,6 +38,18 @@ public class ProfileActivity extends AppCompatActivity {
     String serverKeyStr;
     private DrawerLayout drawerLayout;
     private Button btnOpenMenu;
+    JSONObject userData = new JSONObject();
+    ApiMethods apiMethods = new ApiMethods();
+
+    TextView usernameTextView;
+    TextView roleTextView;
+    TextView ticket1TextView;
+    TextView ticket2TextView;
+    TextView ticket3TextView;
+    LinearLayout ticket1Layout;
+    LinearLayout ticket2Layout;
+    LinearLayout ticket3Layout;
+    Drawable roundedRectangle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,50 +59,56 @@ public class ProfileActivity extends AppCompatActivity {
             ExitDialog.showDialogAndExit(ProfileActivity.this, "Error!");
         } else {
             setContentView(R.layout.activity_profile);
-            initializeVariables();
+
+            usernameTextView = findViewById(R.id.usernameTextView);
+            roleTextView = findViewById(R.id.roleTextView);
+            ticket1TextView = findViewById(R.id.ticket1TextView);
+            ticket2TextView = findViewById(R.id.ticket2TextView);
+            ticket3TextView = findViewById(R.id.ticket3TextView);
+            ticket1Layout = findViewById(R.id.ticket1Layout);
+            ticket2Layout = findViewById(R.id.ticket2Layout);
+            ticket3Layout = findViewById(R.id.ticket3Layout);
+            roundedRectangle = getResources().getDrawable(R.drawable.rounded_rectangle);
+
+            try {
+                getExtras();
+                userParameters();
+                setViews();
+                buttonViews();
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
             setupDrawer();
         }
     }
 
-    private void initializeVariables() {
+    private void getExtras() {
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             serverKeyStr = extras.getString("serverKeyStr");
             encryptDecrypt.secretKey = encryptDecrypt.setSecretKey(serverKeyStr);
             username = extras.getString("username");
             token = extras.getString("token");
-            role = extras.getString("role");
-            ticket1 = extras.getString("ticket1");
-            ticket2 = extras.getString("ticket2");
-            ticket3 = extras.getString("ticket3");
-            initializeViews();
         }
     }
 
-    private void initializeViews() {
-        TextView usernameTextView = findViewById(R.id.usernameTextView);
-        TextView roleTextView = findViewById(R.id.roleTextView);
-        TextView ticket1TextView = findViewById(R.id.ticket1TextView);
-        TextView ticket2TextView = findViewById(R.id.ticket2TextView);
-        TextView ticket3TextView = findViewById(R.id.ticket3TextView);
+    public void userParameters() throws JSONException {
+        apiMethods.getUserData(ProfileActivity.this, username, token, this);
+    }
 
+    public void setViews() {
         usernameTextView.setText(username);
         roleTextView.setText(role);
         ticket1TextView.setText(ticket1);
         ticket2TextView.setText(ticket2);
         ticket3TextView.setText(ticket3);
 
-        LinearLayout ticket1Layout = findViewById(R.id.ticket1Layout);
-        LinearLayout ticket2Layout = findViewById(R.id.ticket2Layout);
-        LinearLayout ticket3Layout = findViewById(R.id.ticket3Layout);
-
-        Drawable roundedRectangle = getResources().getDrawable(R.drawable.rounded_rectangle);
         ticket1Layout.setBackground(roundedRectangle);
         ticket2Layout.setBackground(roundedRectangle);
         ticket3Layout.setBackground(roundedRectangle);
+    }
 
-
-
+    private void buttonViews() {
         Button btnPassChange = findViewById(R.id.btnPassChange);
         btnPassChange.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -135,34 +143,7 @@ public class ProfileActivity extends AppCompatActivity {
         btnLogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                JSONObject jsonBody = new JSONObject();
-                try {
-                    jsonBody.put("username", encryptDecrypt.encrypt(username, encryptDecrypt.secretKey));
-                } catch (JSONException | NoSuchPaddingException | IllegalBlockSizeException |
-                         NoSuchAlgorithmException | BadPaddingException | InvalidKeyException e) {
-                    e.printStackTrace();
-                }
-                requestPost.requestPostAuth(token, jsonBody, LOGOUT_ENDPOINT, new RequestPost.CustomResponseCallback() {
-                    @Override
-                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                showMessage(e.getMessage());
-                                Intent intent = new Intent(ProfileActivity.this, MainActivity.class);
-                                startActivity(intent);
-                                finish();
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        Intent intent = new Intent(ProfileActivity.this, MainActivity.class);
-                        startActivity(intent);
-                        finish();
-                    }
-                });
+                apiMethods.logOut(ProfileActivity.this, username, token);
             }
         });
 
@@ -187,34 +168,7 @@ public class ProfileActivity extends AppCompatActivity {
                     dialogFragment.show(getSupportFragmentManager(), "passwordChangeDialog");
                     closeDrawer();
                 } else if (itemId == R.id.menu_logout) {
-                    JSONObject jsonBody = new JSONObject();
-                    try {
-                        jsonBody.put("username", encryptDecrypt.encrypt(username, encryptDecrypt.secretKey));
-                    } catch (JSONException | NoSuchPaddingException | IllegalBlockSizeException |
-                             NoSuchAlgorithmException | BadPaddingException | InvalidKeyException e) {
-                        e.printStackTrace();
-                    }
-                    requestPost.requestPostAuth(token, jsonBody, LOGOUT_ENDPOINT, new RequestPost.CustomResponseCallback() {
-                        @Override
-                        public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    showMessage(e.getMessage());
-                                    Intent intent = new Intent(ProfileActivity.this, MainActivity.class);
-                                    startActivity(intent);
-                                    finish();
-                                }
-                            });
-                        }
-
-                        @Override
-                        public void onResponse(JSONObject response) {
-                            Intent intent = new Intent(ProfileActivity.this, MainActivity.class);
-                            startActivity(intent);
-                            finish();
-                        }
-                    });
+                    apiMethods.logOut(ProfileActivity.this, username, token);
                 }
                 return true;
             }
@@ -239,5 +193,49 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void showMessage(CharSequence toastText) {
         Toast.makeText(ProfileActivity.this, toastText, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onUserDataReceived(JSONObject userData) {
+        try {
+            role = userData.getString("role");
+            ticket1 = userData.getString("ticket1");
+            ticket2 = userData.getString("ticket2");
+            ticket3 = userData.getString("ticket3");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                setViews();
+            }
+        });
+    }
+
+
+    @Override
+    public void onTicketSent() throws JSONException {
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                showMessage("Ticket sent");
+                try {
+                    userParameters();
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                }
+                setViews();
+            }
+        });
+    }
+
+
+
+    @Override
+    public void onCancel() {
+        // Handle cancel if needed
     }
 }

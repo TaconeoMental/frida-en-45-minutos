@@ -32,10 +32,6 @@ import javax.crypto.NoSuchPaddingException;
 import okhttp3.Call;
 
 public class About extends DialogFragment {
-    private EditText newPasswordEditText;
-    private RequestPost requestPost;
-    private static final String PASSCHANGE_ENDPOINT = BuildConfig.PASSCHANGE_ENDPOINT;
-    private String newPassword;
 
     @NonNull
     @Override
