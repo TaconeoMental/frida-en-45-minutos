@@ -3,6 +3,7 @@ package com.nivel4.fridaen45minutos;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -83,8 +84,10 @@ public class PasswordChange extends DialogFragment {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                showMessage("Password changed");
+                                showMessage("Password updated, please log in again");
                                 dismiss();
+                                Intent intent = new Intent(getActivity(), MainActivity.class);
+                                startActivity(intent);
                             }
                         });
                     }

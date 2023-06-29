@@ -3,6 +3,7 @@ package com.nivel4.fridaen45minutos;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,6 +37,12 @@ public class SendTicket extends DialogFragment {
     private RequestPost requestPost;
     private static final String SENDTICKET_ENDPOINT = BuildConfig.SENDTICKET_ENDPOINT;
     private String newTicket;
+    private SendTicketListener sendTicketListener;
+
+    public interface SendTicketListener {
+        void onTicketSent() throws JSONException;
+        void onCancel();
+    }
 
     @NonNull
     @Override
@@ -85,6 +92,11 @@ public class SendTicket extends DialogFragment {
                             public void run() {
                                 showMessage("Ticket sent");
                                 dismiss();
+                                try {
+                                    sendTicketListener.onTicketSent();
+                                } catch (JSONException e) {
+                                    throw new RuntimeException(e);
+                                }
                             }
                         });
                     }
@@ -96,6 +108,7 @@ public class SendTicket extends DialogFragment {
             @Override
             public void onClick(View v) {
                 dismiss();
+                sendTicketListener.onCancel();
             }
         });
 
@@ -106,11 +119,15 @@ public class SendTicket extends DialogFragment {
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
+        if (context instanceof SendTicketListener) {
+            sendTicketListener = (SendTicketListener) context;
+        } else {
+            throw new IllegalArgumentException("Activity must implement SendTicketListener");
+        }
         requestPost = new RequestPost();
     }
 
     private void showMessage(CharSequence toastText) {
         Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT).show();
     }
-
 }
