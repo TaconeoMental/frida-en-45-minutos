@@ -5,7 +5,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
-import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -19,8 +18,12 @@ import android.widget.Toast;
 
 import com.google.android.material.navigation.NavigationView;
 import com.nivel4.Cipher.EncryptDecrypt;
+import com.nivel4.Dialogs.About;
+import com.nivel4.Dialogs.PasswordChange;
+import com.nivel4.Dialogs.SendTicket;
 import com.nivel4.RootChecker.rootChecker;
 import com.nivel4.RootChecker.ExitDialog;
+import com.nivel4.Utils.ApiMethods;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,17 +32,20 @@ public class ProfileActivity extends AppCompatActivity implements ApiMethods.Use
 
     EncryptDecrypt encryptDecrypt = new EncryptDecrypt();
     public static final String LOGOUT_ENDPOINT = BuildConfig.LOGOUT_ENDPOINT;
-    static String username;
-    static String token;
+    public static String username;
+    public static String token;
     String role;
     String ticket1;
     String ticket2;
     String ticket3;
+    String author1;
+    String author2;
+    String author3;
     String serverKeyStr;
     private DrawerLayout drawerLayout;
     private Button btnOpenMenu;
     JSONObject userData = new JSONObject();
-    ApiMethods apiMethods = new ApiMethods();
+    ApiMethods apiMethods;
 
     TextView usernameTextView;
     TextView roleTextView;
@@ -59,6 +65,7 @@ public class ProfileActivity extends AppCompatActivity implements ApiMethods.Use
             ExitDialog.showDialogAndExit(ProfileActivity.this, "Error!");
         } else {
             setContentView(R.layout.activity_profile);
+            apiMethods = new ApiMethods(this);
 
             usernameTextView = findViewById(R.id.usernameTextView);
             roleTextView = findViewById(R.id.roleTextView);
@@ -93,15 +100,19 @@ public class ProfileActivity extends AppCompatActivity implements ApiMethods.Use
     }
 
     public void userParameters() throws JSONException {
-        apiMethods.getUserData(ProfileActivity.this, username, token, this);
+        apiMethods.postGetuser(ProfileActivity.this, username, token, this);
     }
 
     public void setViews() {
         usernameTextView.setText(username);
         roleTextView.setText(role);
-        ticket1TextView.setText(ticket1);
-        ticket2TextView.setText(ticket2);
-        ticket3TextView.setText(ticket3);
+        String ticket1Text = author1 + ":\n" + ticket1;
+        ticket1TextView.setText(ticket1Text);
+        String ticket2Text = author2 + ":\n" + ticket2;
+        ticket2TextView.setText(ticket2Text);
+        String ticket3Text = author3 + ":\n" + ticket3;
+        ticket3TextView.setText(ticket3Text);
+
 
         ticket1Layout.setBackground(roundedRectangle);
         ticket2Layout.setBackground(roundedRectangle);
@@ -143,7 +154,7 @@ public class ProfileActivity extends AppCompatActivity implements ApiMethods.Use
         btnLogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                apiMethods.logOut(ProfileActivity.this, username, token);
+                apiMethods.postLogout(ProfileActivity.this, username, token);
             }
         });
 
@@ -168,7 +179,7 @@ public class ProfileActivity extends AppCompatActivity implements ApiMethods.Use
                     dialogFragment.show(getSupportFragmentManager(), "passwordChangeDialog");
                     closeDrawer();
                 } else if (itemId == R.id.menu_logout) {
-                    apiMethods.logOut(ProfileActivity.this, username, token);
+                    apiMethods.postLogout(ProfileActivity.this, username, token);
                 }
                 return true;
             }
@@ -202,6 +213,9 @@ public class ProfileActivity extends AppCompatActivity implements ApiMethods.Use
             ticket1 = userData.getString("ticket1");
             ticket2 = userData.getString("ticket2");
             ticket3 = userData.getString("ticket3");
+            author1 = userData.getString("author1");
+            author2 = userData.getString("author2");
+            author3 = userData.getString("author3");
         } catch (JSONException e) {
             e.printStackTrace();
         }

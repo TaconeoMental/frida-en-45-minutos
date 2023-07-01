@@ -30,7 +30,7 @@
             android:layout_marginTop="10dp"
             android:layout_marginBottom="0dp"
             android:contentDescription="Profile Image"
-            android:src="@drawable/account_circle"
+            android:src="@drawable/ic_profile"
             app:layout_constraintBottom_toTopOf="@id/usernameTextView"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"

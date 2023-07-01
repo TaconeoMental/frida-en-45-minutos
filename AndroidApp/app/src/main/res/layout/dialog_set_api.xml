@@ -12,10 +12,18 @@
         android:textAppearance="@android:style/TextAppearance.Large" />
 
     <EditText
-        android:id="@+id/newTicketEditText"
+        android:id="@+id/hostEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Describe your ticket" />
+        android:inputType="text"
+        android:hint="127.0.0.1" />
+
+    <EditText
+        android:id="@+id/portEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:hint="8080" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -25,10 +33,10 @@
         android:paddingTop="20dp">
 
         <Button
-            android:id="@+id/sendButton"
+            android:id="@+id/setButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Send"/>
+            android:text="Set"/>
 
         <Button
             android:id="@+id/cancelButton"
@@ -38,6 +46,5 @@
             android:layout_marginStart="20dp"/>
 
     </LinearLayout>
-
 
 </LinearLayout>

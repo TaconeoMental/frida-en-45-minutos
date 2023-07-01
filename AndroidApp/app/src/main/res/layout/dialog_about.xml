@@ -16,8 +16,11 @@
         android:id="@+id/aboutTextView"/>
 
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:paddingTop="20dp">
 
         <Button
             android:id="@+id/closeButton"
