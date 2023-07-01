@@ -11,12 +11,15 @@ from app import app, db, bcrypt
 class User(db.Model):
     __tablename__ = "users"
 
-    id       = db.Column(db.Integer, primary_key=True)
+    id       = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(100), unique=True)
     password = db.Column(db.String(100), nullable=False)
     role     = db.Column(db.String(50), nullable=False)
 
-    sessions = db.relationship("Session", backref="user", lazy=True)
+    sessions = db.relationship("Session",
+                               backref="user",
+                               cascade="all, delete-orphan",
+                               lazy=True)
 
     def __init__(self, username, password, role):
         self.username = username
@@ -33,7 +36,7 @@ class User(db.Model):
 class Session(db.Model):
     __tablename__ = "sessions"
 
-    id         = db.Column(db.Integer, primary_key=True)
+    id         = db.Column(db.Integer, primary_key=True, autoincrement=True)
     shared_key = db.Column(db.String(50), nullable=False)
     uuid       = db.Column(db.String(50), nullable=False)
 
@@ -68,3 +71,20 @@ class Session(db.Model):
             return payload["sub"]
         except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
             return None
+
+
+class BlacklistToken(db.Model):
+    __tablename__ = 'blacklisted_tokens'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    token = db.Column(db.String(500), unique=True, nullable=False)
+
+    def __init__(self, token):
+        self.token = token
+
+    @staticmethod
+    def is_blacklisted(token):
+        res = BlacklistToken.query.filter_by(token=token).first()
+        if res:
+            return True
+        return False
