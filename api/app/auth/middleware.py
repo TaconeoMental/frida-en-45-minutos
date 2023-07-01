@@ -28,9 +28,6 @@ class API:
         # cualquier cosa lo maneja handles_server_error.
         if not (session := Session.query.filter_by(uuid=uuid).first()):
             return None
-
-        print(session)
-
         return session
 
     @staticmethod

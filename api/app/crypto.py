@@ -5,7 +5,6 @@ from Crypto.Cipher import DES3
 from Crypto.Util.Padding import pad, unpad
 
 import app.utils as utils
-from app.database.models import Session
 
 from . import db
 
@@ -21,20 +20,11 @@ def is_valid_key(key, partial=False):
     length = PARTIAL_KEY_BYTES if partial else MAIN_KEY_BYTES
     return utils.is_hex(key) and len(bytes.fromhex(key)) == length
 
-
-# Genera una llave simétrica, la guarda en la db y devuelve el objeto de sesión
-# asociado
-def create_session(client_key, server_key):
+def build_shared_key(client_key, server_key):
     # Generamos la llave de la forma más insegura posible
     shared_bytes = bytes.fromhex(client_key + server_key)
     shared_key = DES3.adjust_key_parity(shared_bytes).hex()
-    #shared_key = hashlib.sha1(shared_bytes).hexdigest()[:24]
-
-    # Creamos y guardamos la sesión
-    session = Session(shared_key)
-    db.session.add(session)
-    db.session.commit()
-    return session
+    return shared_key
 
 class Cipher:
     def __init__(self, secret_key):

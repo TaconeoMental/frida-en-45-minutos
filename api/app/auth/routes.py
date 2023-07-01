@@ -20,33 +20,22 @@ def handle_init():
         return utils.basic_response(400, "Invalid partial key")
 
     server_key = crypto.create_partial_key()
-    session = crypto.create_session(client_key, server_key)
+    session = Session(client_key, server_key)
 
-    token = session.gen_token()
+    db.session.add(session)
+    db.session.commit()
 
     return utils.basic_response(200, values={
         "key": server_key,
-        "token": token
+        "token": session.create_token()
     })
 
 # Osi muchos decoradores gracias gracias
 @main.route("/login", methods=["POST"])
 @middleware(API.HandleError, API.CheckSession)
 def handle_login(session):
-    content = request.get_json(silent=True)
-
-    enc_username = content.get("username")
-    enc_password = content.get("password")
-
-    if not all([enc_username, enc_password]):
-        return utils.basic_response(400)
-
-    shared_key = session.shared_key
-    print(shared_key) # TODO: Quitar?
-    cipher = crypto.Cipher(bytes.fromhex(shared_key))
-
-    dec_username = cipher.decrypt(enc_username)
-    dec_password = cipher.decrypt(enc_password)
+    dec_request = session.decrypt_request("username", "password")
+    dec_username, dec_password = dec_request.values()
 
     user = User.query.filter_by(
         username=dec_username
@@ -62,12 +51,12 @@ def handle_login(session):
     return utils.basic_response(200)
 
 @main.route("/logout", methods=["POST"])
-@middleware(API.CheckAuth)
+@middleware(API.HandleError, API.CheckAuth)
 def handle_logout(session):
-    session.user = None
-
-    token = request.headers["45MinuteToken"]
-    db.session.add(BlacklistToken(token))
+    session.destroy()
+    db.session.add(
+        BlacklistToken(request.headers["45MinuteToken"])
+    )
     db.session.commit()
 
     return utils.basic_response(200, msg="Shao lo vimo")
@@ -75,17 +64,8 @@ def handle_logout(session):
 @main.route("/changepass", methods=["POST"])
 @middleware(API.HandleError, API.CheckAuth)
 def handle_changepass(session):
-    content = request.get_json(silent=True)
-
-    enc_username = content.get("username")
-    enc_password = content.get("password")
-    if not all([enc_username, enc_password]):
-        return utils.basic_response(400)
-
-    cipher = crypto.Cipher(bytes.fromhex(session.shared_key))
-
-    dec_username = cipher.decrypt(enc_username)
-    dec_password = cipher.decrypt(enc_password)
+    dec_request = session.decrypt_request("username", "password")
+    dec_username, dec_password = dec_request.values()
 
     # Esta parte es vulnerable jeje. Lo correcto sería utilizar session.user,
     # pero qué fome la vida así tan segura.
@@ -94,6 +74,8 @@ def handle_changepass(session):
     ).first()
     user.set_password(dec_password)
 
+    # Destruimos la sesión
+    session.destroy()
     db.session.commit()
 
     return utils.basic_response(200, msg=f"Se han actualizado los datos de '{dec_username}'")

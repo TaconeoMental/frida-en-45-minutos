@@ -1,11 +1,11 @@
-import uuid
+from collections import OrderedDict
 import datetime
+import uuid
 
 import jwt
-import sqlalchemy as sa
+from flask import request
 
-from sqlalchemy.orm import relationship
-
+import app.crypto as crypto
 from app import app, db, bcrypt
 
 class User(db.Model):
@@ -42,11 +42,26 @@ class Session(db.Model):
 
     user_id    = db.Column(db.Integer, db.ForeignKey('users.id'))
 
-    def __init__(self, shared_key):
-        self.shared_key = shared_key
+    def __init__(self, client_key, server_key):
+        self.shared_key = crypto.build_shared_key(client_key, server_key)
         self.uuid = str(uuid.uuid4())
 
-    def gen_token(self):
+    def decrypt_request(self, *keys):
+        content = request.get_json()
+        cipher = crypto.Cipher(bytes.fromhex(self.shared_key))
+
+        dec_values = OrderedDict()
+        for k in keys:
+            if k not in content:
+                raise EndpointException(400)
+            dec_values[k] = cipher.decrypt(content[k])
+
+        return dec_values
+
+    def destroy(self):
+        self.user = None
+
+    def create_token(self):
         now = datetime.datetime.utcnow()
         payload = {
             'exp': now + datetime.timedelta(days=0, minutes=30),
