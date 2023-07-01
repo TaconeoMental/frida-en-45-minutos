@@ -4,9 +4,8 @@ import base64
 from Crypto.Cipher import DES3
 from Crypto.Util.Padding import pad, unpad
 
-import app.utils as utils
-
 from . import db
+import app.utils as utils
 
 MAIN_KEY_BYTES = 24
 PARTIAL_KEY_BYTES = MAIN_KEY_BYTES // 2
@@ -48,15 +47,24 @@ class Cipher:
         return plaintext
 
     def encrypt_dict(self, d):
-        return {k: self.encrypt(v) for k, v in d.items()}
+        enc_dict = dict()
+        for k, v in d.items():
+            if type(v) == str:
+                enc_dict[k] = self.encrypt(v)
+            elif type(v) == dict:
+                enc_dict[k] = self.encrypt_dict(v)
+            elif type(v) == list:
+                enc_dict[k] = [self.encrypt(i) for i in v]
+        return enc_dict
 
+    # TODO
     def decrypt_dict(self, d):
         return {k: self.decrypt(v) for k, v in d.items()}
 
     # Genera una respuesta HTTP cifrada. Esta consiste de un código de estado y un objeto
     # JSON. Este último, por su parte, contiene una descripción del código de estado, un
     # mensaje opcional y los valores que se quieran enviar.
-    def build_response(status_code, val_dict=None, msg=None):
+    def build_response(self, status_code, val_dict=None, msg=None):
         values = val_dict or {}
         response_msg = {"msg": msg} if msg else {}
 

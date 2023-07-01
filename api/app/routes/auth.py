@@ -1,17 +1,17 @@
-from flask import Flask, request, Response
+from flask import Flask, request
 from flask import Blueprint
 
 from app import db, bcrypt
 import app.crypto as crypto
 import app.utils as utils
-from app.database.models import Session, User, BlacklistToken
+from app.models import Session, User, BlacklistToken
+from app.helpers import request_values
+from app.middleware import middleware, API
 
-from .helpers import request_values
-from .middleware import middleware, API
 
-main = Blueprint('main', __name__)
+auth_blueprint = Blueprint('auth', __name__)
 
-@main.route("/init", methods=["POST"])
+@auth_blueprint.route("/init", methods=["POST"])
 @middleware(API.HandleError)
 def handle_init():
     client_key = request_values("auth")
@@ -31,16 +31,13 @@ def handle_init():
     })
 
 # Osi muchos decoradores gracias gracias
-@main.route("/login", methods=["POST"])
+@auth_blueprint.route("/login", methods=["POST"])
 @middleware(API.HandleError, API.CheckSession)
 def handle_login(session):
     dec_request = session.decrypt_request("username", "password")
     dec_username, dec_password = dec_request.values()
 
-    user = User.query.filter_by(
-        username=dec_username
-    ).first()
-
+    user = User.from_username(dec_username)
     if not (user and bcrypt.check_password_hash(user.password, dec_password)):
         return utils.basic_response(401, "Los datos ingresados no son correctos")
 
@@ -50,7 +47,7 @@ def handle_login(session):
 
     return utils.basic_response(200)
 
-@main.route("/logout", methods=["POST"])
+@auth_blueprint.route("/logout", methods=["POST"])
 @middleware(API.HandleError, API.CheckAuth)
 def handle_logout(session):
     session.destroy()
@@ -61,7 +58,7 @@ def handle_logout(session):
 
     return utils.basic_response(200, msg="Shao lo vimo")
 
-@main.route("/changepass", methods=["POST"])
+@auth_blueprint.route("/changepass", methods=["POST"])
 @middleware(API.HandleError, API.CheckAuth)
 def handle_changepass(session):
     dec_request = session.decrypt_request("username", "password")
@@ -69,9 +66,7 @@ def handle_changepass(session):
 
     # Esta parte es vulnerable jeje. Lo correcto sería utilizar session.user,
     # pero qué fome la vida así tan segura.
-    user = User.query.filter_by(
-        username=dec_username
-    ).first()
+    user = User.from_username(dec_username)
     user.set_password(dec_password)
 
     # Destruimos la sesión

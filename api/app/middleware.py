@@ -2,8 +2,8 @@ from functools import wraps
 
 from flask import request
 
-from app.database.models import Session
-from app.utils import basic_response
+from .models import Session
+from .utils import basic_response
 from .helpers import EndpointException
 
 def middleware(*checks):
@@ -39,6 +39,7 @@ class API:
             except EndpointException as e:
                 return basic_response(e.code, e.msg)
             except Exception as e:
+                print(e)
                 return basic_response(500, msg="Se ha producido un error desconocido")
         return wrapper
 

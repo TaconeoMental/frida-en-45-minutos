@@ -5,32 +5,8 @@ import uuid
 import jwt
 from flask import request
 
+from app import app, db
 import app.crypto as crypto
-from app import app, db, bcrypt
-
-class User(db.Model):
-    __tablename__ = "users"
-
-    id       = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    username = db.Column(db.String(100), unique=True)
-    password = db.Column(db.String(100), nullable=False)
-    role     = db.Column(db.String(50), nullable=False)
-
-    sessions = db.relationship("Session",
-                               backref="user",
-                               cascade="all, delete-orphan",
-                               lazy=True)
-
-    def __init__(self, username, password, role):
-        self.username = username
-        self.role = role
-        self.set_password(password)
-
-    def set_password(self, password):
-        self.password = bcrypt.generate_password_hash(
-            password,
-            app.config.get('BCRYPT_LOG_ROUNDS')
-        ).decode()
 
 
 class Session(db.Model):
@@ -39,16 +15,18 @@ class Session(db.Model):
     id         = db.Column(db.Integer, primary_key=True, autoincrement=True)
     shared_key = db.Column(db.String(50), nullable=False)
     uuid       = db.Column(db.String(50), nullable=False)
-
     user_id    = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     def __init__(self, client_key, server_key):
         self.shared_key = crypto.build_shared_key(client_key, server_key)
         self.uuid = str(uuid.uuid4())
 
+    def get_cipher(self):
+        return crypto.Cipher(bytes.fromhex(self.shared_key))
+
     def decrypt_request(self, *keys):
         content = request.get_json()
-        cipher = crypto.Cipher(bytes.fromhex(self.shared_key))
+        cipher = self.get_cipher()
 
         dec_values = OrderedDict()
         for k in keys:
