@@ -19,10 +19,10 @@ bcrypt = Bcrypt(app)
 migrate = Migrate(app, db)
 
 with app.app_context():
-    from .models import Session, User, Ticket
+    from .models import Session, User, Post
     db.create_all()
 
-    from app.database.populate_users import load_data
+    from app.database.helpers import load_data
     load_data(db)
 
 from .routes.auth import auth_blueprint

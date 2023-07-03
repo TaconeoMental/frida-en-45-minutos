@@ -64,9 +64,12 @@ def handle_changepass(session):
     dec_request = session.decrypt_request("username", "password")
     dec_username, dec_password = dec_request.values()
 
-    # Esta parte es vulnerable jeje. Lo correcto sería utilizar session.user,
-    # pero qué fome la vida así tan segura.
+    s_user = session.user
+
+    # Solo un admin puede cambiar la contraseña de otro usuario
     user = User.from_username(dec_username)
+    if dec_username != s_user.username and not s_user.is_admin():
+        return utils.basic_response(401)
     user.set_password(dec_password)
 
     # Destruimos la sesión

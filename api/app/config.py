@@ -1,9 +1,9 @@
 import os
 
-basedir = os.path.abspath(os.path.dirname(__file__))
+__basedir__ = os.path.abspath(os.path.dirname(__file__))
 
 database_name = 'database/frida_45_min.db'
-DATABASE_URI = f"sqlite:///{os.path.join(basedir, database_name)}"
+DATABASE_URI = f"sqlite:///{os.path.join(__basedir__, database_name)}"
 
 class BaseConfig:
     SECRET_KEY = os.getenv('SECRET_KEY', os.urandom(24))

@@ -7,6 +7,8 @@ from flask import request
 
 from app import app, db
 import app.crypto as crypto
+import app.utils as utils
+from app.helpers import EndpointException
 
 
 class Session(db.Model):
@@ -36,13 +38,27 @@ class Session(db.Model):
 
         return dec_values
 
+    # Genera una respuesta HTTP cifrada. Esta consiste de un código de estado y un objeto
+    # JSON. Este último, por su parte, contiene una descripción del código de estado, un
+    # mensaje opcional y los valores que se quieran enviar.
+    def build_response(self, status_code, val_dict=None, msg=None):
+        cipher = self.get_cipher()
+        values = val_dict or {}
+        response_msg = {"msg": msg} if msg else {}
+
+        status_text = utils.status_code_text(status_code)
+        response_dict = {"status": status_text} \
+                        | response_msg \
+                        | cipher.encrypt(values)
+        return response_dict, status_code
+
     def destroy(self):
         self.user = None
 
     def create_token(self):
         now = datetime.datetime.utcnow()
         payload = {
-            'exp': now + datetime.timedelta(days=0, minutes=30),
+            'exp': now + datetime.timedelta(days=0, minutes=45),
             'iat': now,
             'sub': self.uuid
 
