@@ -41,6 +41,10 @@ dependencies {
 
 apply from: "utils.gradle"
 android {
+
+    buildFeatures {
+        viewBinding true
+    }
     defaultConfig {
         buildConfigField 'String', 'INIT_ENDPOINT', toJavaCodeString(INIT_ENDPOINT)
         buildConfigField 'String', 'LOGIN_ENDPOINT', toJavaCodeString(LOGIN_ENDPOINT)

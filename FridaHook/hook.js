@@ -23,10 +23,13 @@ if (Java.available){
         EncryptDecryptClass.encrypt.implementation = function(String, Secretkey){
             console.log("[+] Plaintext:", String);
             console.log("[+] Secretkey:", Secretkey);
-            if(String.includes("user")){
-                String = "admin";
-            }
             return this.encrypt(String, Secretkey);
+        }
+
+        EncryptDecryptClass.decrypt.implementation = function(String, Secretkey){
+            console.log("[+] Plain:", this.decrypt(String, Secretkey));
+            console.log("[+] Secretkey:", Secretkey);
+            return this.decrypt(String, Secretkey);
         }
 
     })

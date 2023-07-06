@@ -16,35 +16,48 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 import com.nivel4.Utils.ApiMethods;
+import com.nivel4.fridaen45minutos.FeedActivity;
 import com.nivel4.fridaen45minutos.ProfileActivity;
 import com.nivel4.fridaen45minutos.R;
 import com.nivel4.httpClient.RequestPost;
 
-public class PasswordChange extends DialogFragment implements ApiMethods.PassChangeCallback {
-    private EditText newPasswordEditText;
+import org.json.JSONException;
+
+public class SendPost extends DialogFragment implements ApiMethods.SendPostCallback {
+    private EditText newPostEditText;
     private RequestPost requestPost;
-    private String newPassword;
+    private String newPost;
+    private SendPostListener sendPostListener;
+
+    public interface SendPostListener {
+        void onPostSent() throws JSONException;
+        void onCancel();
+    }
+
+    public SendPost(SendPostListener sendPostListener) {
+        this.sendPostListener = sendPostListener;
+    }
 
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = requireActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.dialog_password_change, null);
+        View view = inflater.inflate(R.layout.dialog_send_post, null);
 
         TextView labelTextView = view.findViewById(R.id.labelTextView);
-        newPasswordEditText = view.findViewById(R.id.newPasswordEditText);
+        newPostEditText = view.findViewById(R.id.newPostEditText);
         Button sendButton = view.findViewById(R.id.sendButton);
         Button cancelButton = view.findViewById(R.id.cancelButton);
 
-        labelTextView.setText("Password update");
+        labelTextView.setText("New Post");
 
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 ApiMethods apiMethods = new ApiMethods(getActivity());
-                newPassword = newPasswordEditText.getText().toString();
-                apiMethods.postChangePass(getActivity(), ProfileActivity.username, newPassword, ProfileActivity.token, PasswordChange.this);
+                newPost = newPostEditText.getText().toString();
+                apiMethods.postSendPost(getActivity(), FeedActivity.username, newPost, ProfileActivity.token, SendPost.this);
             }
         });
 
@@ -52,6 +65,7 @@ public class PasswordChange extends DialogFragment implements ApiMethods.PassCha
             @Override
             public void onClick(View v) {
                 dismiss();
+                sendPostListener.onCancel();
             }
         });
 
@@ -62,6 +76,11 @@ public class PasswordChange extends DialogFragment implements ApiMethods.PassCha
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
+        if (context instanceof SendPostListener) {
+            sendPostListener = (SendPostListener) context;
+        } else {
+            throw new IllegalArgumentException("Activity must implement SendPostListener");
+        }
         requestPost = new RequestPost();
     }
 
@@ -70,8 +89,16 @@ public class PasswordChange extends DialogFragment implements ApiMethods.PassCha
     }
 
     @Override
-    public void onPassChanged() {
-        ApiMethods apiMethods = new ApiMethods(getActivity());
-        apiMethods.postLogout(getActivity(), ProfileActivity.username, ProfileActivity.token);
+    public void onPostSentSuccess() throws JSONException {
+        showMessage("Post sent");
+        dismiss();
+        sendPostListener.onPostSent();
     }
+
+    @Override
+    public void onPostSentFailure(String errorMessage) {
+        showMessage(errorMessage);
+        dismiss();
+    }
+
 }

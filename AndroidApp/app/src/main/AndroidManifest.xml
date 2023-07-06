@@ -18,6 +18,11 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".FeedActivity"
+            android:exported="false"
+            android:label="@string/title_activity_feed"
+            android:theme="@style/Theme.Fridaen45minutos.NoActionBar" />
+        <activity
             android:name=".ProfileActivity"
             android:exported="false" />
         <activity

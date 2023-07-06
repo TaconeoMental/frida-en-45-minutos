@@ -1,4 +1,4 @@
-package com.nivel4.RootChecker;
+package com.nivel4.Dialogs;
 
 import android.content.Context;
 import android.content.DialogInterface;

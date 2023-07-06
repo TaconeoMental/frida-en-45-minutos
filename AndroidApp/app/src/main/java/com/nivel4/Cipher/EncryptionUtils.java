@@ -2,7 +2,7 @@ package com.nivel4.Cipher;
 
 public class EncryptionUtils {
 
-    static byte[] hexToBytes(String hex) {
+    public static byte[] hexToBytes(String hex) {
         int len = hex.length();
         byte[] bytes = new byte[len / 2];
         for (int i = 0; i < len; i += 2) {
@@ -20,7 +20,7 @@ public class EncryptionUtils {
         return sb.toString();
     }
 
-    static byte[] concatArrays(byte[] a, byte[] b) {
+    public static byte[] concatArrays(byte[] a, byte[] b) {
         byte[] result = new byte[a.length + b.length];
         System.arraycopy(a, 0, result, 0, a.length);
         System.arraycopy(b, 0, result, a.length, b.length);

@@ -1,14 +1,9 @@
 package com.nivel4.Cipher;
 
-import static com.nivel4.Cipher.EncryptionUtils.concatArrays;
 import static com.nivel4.Cipher.EncryptionUtils.hexToBytes;
 
-import android.util.Log;
-
-import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.security.spec.KeySpec;
 import java.util.Arrays;
 import java.util.Base64;
 
@@ -18,8 +13,6 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.DESedeKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 public class EncryptDecrypt {

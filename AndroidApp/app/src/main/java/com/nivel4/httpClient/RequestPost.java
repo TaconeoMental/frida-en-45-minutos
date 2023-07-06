@@ -1,12 +1,6 @@
 package com.nivel4.httpClient;
 
-import android.content.Context;
-import android.content.Intent;
-import android.util.Log;
-
 import androidx.annotation.NonNull;
-
-import com.nivel4.fridaen45minutos.MainActivity;
 
 import org.json.JSONException;
 import org.json.JSONObject;

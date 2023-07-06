@@ -12,10 +12,10 @@
         android:textAppearance="@android:style/TextAppearance.Large" />
 
     <EditText
-        android:id="@+id/newTicketEditText"
+        android:id="@+id/newPostEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Describe your ticket" />
+        android:hint="Describe your post" />
 
     <LinearLayout
         android:layout_width="match_parent"
