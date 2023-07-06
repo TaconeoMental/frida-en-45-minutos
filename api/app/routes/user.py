@@ -19,7 +19,7 @@ def handle_getuser(session):
     dec_response = {
         "username": user.username,
         "role": user.get_role(),
-        "biography": user.biography,
+        "bio": user.biography,
         "password_hint": user.pass_hint
     }
     return session.build_response(200, dec_response)
@@ -38,7 +38,7 @@ def handle_getfeed(session):
     # Admins tienen acceso a posts de otros admins
     if user.get_role() == "admin":
         filters.append(Post.public == False)
-    posts = Post.query.filter(or_(*filters)).limit(30).all()
+    posts = Post.query.filter(or_(*filters)).order_by(Post.id.desc()).all()
 
     dec_response = {"posts": list()}
     for post in posts:
