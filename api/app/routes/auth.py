@@ -1,7 +1,9 @@
 from flask import Flask, request
 from flask import Blueprint
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
-from app import db, bcrypt
+from app import db, bcrypt, app
 import app.crypto as crypto
 import app.utils as utils
 from app.models import Session, User, BlacklistToken
@@ -10,8 +12,10 @@ from app.middleware import middleware, API
 
 
 auth_blueprint = Blueprint('auth', __name__)
+rate_limiter = Limiter(app=app, key_func=get_remote_address)
 
 @auth_blueprint.route("/init", methods=["POST"])
+@rate_limiter.limit("10/minute")
 @middleware(API.HandleError)
 def handle_init():
     client_key = request_values("auth")
