@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
             window.setStatusBarColor(getResources().getColor(R.color.custom_bright_white)); // Replace with your desired color
         }
 
-        if (!isRootedDevice()) {
+        if (isRootedDevice()) {
             ExitDialog.showDialogAndExit(MainActivity.this, "Error!");
         } else {
             setContentView(R.layout.activity_main);

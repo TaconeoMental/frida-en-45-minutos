@@ -62,7 +62,7 @@ public class FeedActivity extends AppCompatActivity implements ApiMethods.FeedDa
             window.setStatusBarColor(getResources().getColor(R.color.custom_bright_white)); // Replace with your desired color
         }
 
-        if (!isRootedDevice()) {
+        if (isRootedDevice()) {
             ExitDialog.showDialogAndExit(FeedActivity.this, "Error!");
         } else {
             getExtras();
