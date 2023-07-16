@@ -115,7 +115,6 @@ public class ApiMethods {
                         encryptDecrypt.secretKey = encryptDecrypt.setSecretKey(key);
                         MainActivity.serverKeyStr = secretKeyStr;
                         MainActivity.token = response.getString("token");
-                        MainActivity.initOK = true;
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();

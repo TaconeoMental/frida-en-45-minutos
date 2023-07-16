@@ -3,19 +3,24 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="@drawable/border_line">
 
     <TextView
         android:id="@+id/labelTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="@android:style/TextAppearance.Large" />
+        android:textAppearance="@android:style/TextAppearance.Large"
+        android:textColor="@color/custom_yellow"/>
 
     <EditText
         android:id="@+id/newPostEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Describe your post" />
+        android:hint="Describe your post"
+        android:textColorHint="@color/foreground"
+        android:textColor="@color/custom_yellow"
+        android:backgroundTint="@color/custom_bright_white"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -28,14 +33,18 @@
             android:id="@+id/sendButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Send"/>
+            android:text="Send"
+            android:backgroundTint="@color/custom_bright_white"
+            android:textColor="@color/foreground"/>
 
         <Button
             android:id="@+id/cancelButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Cancel"
-            android:layout_marginStart="20dp"/>
+            android:layout_marginStart="20dp"
+            android:backgroundTint="@color/custom_bright_white"
+            android:textColor="@color/foreground"/>
 
     </LinearLayout>
 

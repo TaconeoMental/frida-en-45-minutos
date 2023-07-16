@@ -5,7 +5,8 @@
     android:id="@+id/drawerLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true">
+    android:fitsSystemWindows="true"
+    android:background="@color/background">
 
     <!-- Content View -->
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -19,6 +20,8 @@
             android:text="Menu"
             android:layout_marginTop="10dp"
             android:layout_marginEnd="10dp"
+            android:backgroundTint="@color/custom_bright_white"
+            android:textColor="@color/foreground"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -47,6 +50,7 @@
             app:layout_constraintTop_toBottomOf="@id/icon_profile"
             app:layout_constraintBottom_toTopOf="@id/roleTextView"
             android:layout_marginBottom="5dp"
+            android:textColor="@color/custom_yellow"
             android:gravity="center_horizontal" />
 
         <TextView
@@ -59,6 +63,7 @@
             app:layout_constraintTop_toBottomOf="@id/usernameTextView"
             app:layout_constraintBottom_toTopOf="@id/userInfoLinearLayout"
             android:layout_marginBottom="5dp"
+            android:textColor="@color/custom_yellow"
             android:gravity="center_horizontal" />
 
         <LinearLayout
@@ -85,13 +90,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="20sp"
-                    android:text="Biography"/>
+                    android:text="Biography"
+                    android:textColor="@color/custom_yellow"/>
 
                 <TextView
                     android:id="@+id/bioTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="16sp" />
+                    android:textSize="16sp"
+                    android:textColor="@color/foreground"/>
 
             </LinearLayout>
 
@@ -113,13 +120,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="20sp"
-                    android:text="Password hint"/>
+                    android:text="Password hint"
+                    android:textColor="@color/custom_yellow"/>
 
                 <TextView
                     android:id="@+id/password_hintTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="16sp" />
+                    android:textSize="16sp"
+                    android:textColor="@color/foreground"/>
 
             </LinearLayout>
 
@@ -133,7 +142,8 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:fitsSystemWindows="true">
+        android:fitsSystemWindows="true"
+        android:background="@color/background">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -157,6 +167,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Menu"
+                    android:textColor="@color/custom_yellow"
                     android:textSize="20sp"
                     android:paddingStart="16dp" />
 
@@ -165,13 +176,16 @@
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:gravity="center">
+                android:gravity="center"
+                android:background="@color/background">
 
                 <Button
                     android:id="@+id/btnFeed"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Feed"
+                    android:backgroundTint="@color/custom_bright_white"
+                    android:textColor="@color/foreground"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"/>
@@ -181,6 +195,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Password Change"
+                    android:backgroundTint="@color/custom_bright_white"
+                    android:textColor="@color/foreground"
                     app:layout_constraintTop_toBottomOf="@id/btnFeed"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"/>
@@ -190,6 +206,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="About"
+                    android:backgroundTint="@color/custom_bright_white"
+                    android:textColor="@color/foreground"
                     app:layout_constraintTop_toBottomOf="@id/btnPassChange"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"/>
@@ -199,6 +217,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Logout"
+                    android:backgroundTint="@color/custom_bright_white"
+                    android:textColor="@color/foreground"
                     android:padding="16dp"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"

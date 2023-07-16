@@ -4,8 +4,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -36,13 +39,17 @@ public class MainActivity extends AppCompatActivity {
     private String hostStr;
     private String portStr;
     private String apiURL = "";
-    public static Boolean initOK = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(getResources().getColor(R.color.custom_bright_white)); // Replace with your desired color
+        }
 
-        if (isRootedDevice()) {
+        if (!isRootedDevice()) {
             ExitDialog.showDialogAndExit(MainActivity.this, "Error!");
         } else {
             setContentView(R.layout.activity_main);

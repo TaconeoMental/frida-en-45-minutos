@@ -3,17 +3,20 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="@drawable/border_line">
 
     <TextView
         android:id="@+id/labelTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="@android:style/TextAppearance.Large" />
+        android:textAppearance="@android:style/TextAppearance.Large"
+        android:textColor="@color/custom_yellow"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/aboutTextView"/>
+        android:id="@+id/aboutTextView"
+        android:textColor="@color/foreground" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -26,6 +29,8 @@
             android:id="@+id/closeButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:backgroundTint="@color/custom_bright_white"
+            android:textColor="@color/foreground"
             android:text="Close" />
 
     </LinearLayout>

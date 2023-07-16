@@ -1,7 +1,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/menu_change_password"
-        android:title="Change Password"/>
+        android:title="Profile"/>
+    <item
+        android:id="@+id/menu_about"
+        android:title="About"/>
     <item
         android:id="@+id/menu_logout"
         android:title="Logout" />

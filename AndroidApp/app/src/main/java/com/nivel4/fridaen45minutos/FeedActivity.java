@@ -1,27 +1,30 @@
 package com.nivel4.fridaen45minutos;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.os.Build;
 import android.os.Bundle;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.navigation.NavigationView;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-
 import android.os.Handler;
 import android.os.Looper;
 import android.util.TypedValue;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.navigation.NavigationView;
 import com.nivel4.Cipher.EncryptDecrypt;
 import com.nivel4.Dialogs.About;
 import com.nivel4.Dialogs.ExitDialog;
@@ -29,7 +32,6 @@ import com.nivel4.Dialogs.PasswordChange;
 import com.nivel4.Dialogs.SendPost;
 import com.nivel4.RootChecker.rootChecker;
 import com.nivel4.Utils.ApiMethods;
-import com.nivel4.fridaen45minutos.databinding.ActivityFeedBinding;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -37,7 +39,6 @@ import org.json.JSONObject;
 
 public class FeedActivity extends AppCompatActivity implements ApiMethods.FeedDataCallback, ApiMethods.UserDataCallback, SendPost.SendPostListener {
 
-    private ActivityFeedBinding binding;
     EncryptDecrypt encryptDecrypt = new EncryptDecrypt();
     private String serverKeyStr;
     public static String username;
@@ -49,17 +50,19 @@ public class FeedActivity extends AppCompatActivity implements ApiMethods.FeedDa
     private LinearLayout feedContainer;
     private DrawerLayout drawerLayout;
     private Button btnOpenMenu;
-
-
-
     ApiMethods apiMethods;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(getResources().getColor(R.color.custom_bright_white)); // Replace with your desired color
+        }
 
-        if (isRootedDevice()) {
+        if (!isRootedDevice()) {
             ExitDialog.showDialogAndExit(FeedActivity.this, "Error!");
         } else {
             getExtras();
@@ -92,6 +95,9 @@ public class FeedActivity extends AppCompatActivity implements ApiMethods.FeedDa
 
     private void buttonViews() {
         FloatingActionButton btnSendPost = findViewById(R.id.fabSendPost);
+        btnSendPost.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.custom_bright_white)));  // Replace with your desired background color
+        btnSendPost.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_send));  // Replace with your desired drawable
+        btnSendPost.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.foreground)));
         btnSendPost.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -243,6 +249,7 @@ public class FeedActivity extends AppCompatActivity implements ApiMethods.FeedDa
             authorTextView.setPadding(20, 0, 0, 0);
             authorTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
             authorTextView.setText(author);
+            authorTextView.setTextColor(getColor(R.color.custom_yellow));
 
             TextView contentsTextView = new TextView(feedItemView.getContext());
             LinearLayout.LayoutParams contentsLayoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -251,6 +258,7 @@ public class FeedActivity extends AppCompatActivity implements ApiMethods.FeedDa
             contentsTextView.setPadding(20, 0, 0, 0);
             contentsTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
             contentsTextView.setText(contents);
+            contentsTextView.setTextColor(getColor(R.color.foreground));
 
             feedItemLayout.addView(authorTextView);
             feedItemLayout.addView(contentsTextView);

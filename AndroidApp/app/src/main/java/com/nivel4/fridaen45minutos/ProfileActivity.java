@@ -7,9 +7,12 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -31,6 +34,7 @@ public class ProfileActivity extends AppCompatActivity implements ApiMethods.Use
     EncryptDecrypt encryptDecrypt = new EncryptDecrypt();
     public static String username;
     public static String token;
+    String user;
     String role;
     String bio;
     String password_hint;
@@ -51,8 +55,12 @@ public class ProfileActivity extends AppCompatActivity implements ApiMethods.Use
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        if (isRootedDevice()) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(getResources().getColor(R.color.custom_bright_white)); // Replace with your desired color
+        }
+        if (!isRootedDevice()) {
             ExitDialog.showDialogAndExit(ProfileActivity.this, "Error!");
         } else {
             setContentView(R.layout.activity_profile);
@@ -93,7 +101,7 @@ public class ProfileActivity extends AppCompatActivity implements ApiMethods.Use
     }
 
     public void setViews() {
-        usernameTextView.setText(username);
+        usernameTextView.setText(user);
         roleTextView.setText(role);
         bioTextView.setText(bio);
         password_hintTextView.setText(password_hint);
@@ -195,6 +203,7 @@ public class ProfileActivity extends AppCompatActivity implements ApiMethods.Use
     @Override
     public void onUserDataReceived(JSONObject userData) {
         try {
+            user = userData.getString("username");
             role = userData.getString("role");
             bio = userData.getString("bio");
             password_hint = userData.getString("password_hint");

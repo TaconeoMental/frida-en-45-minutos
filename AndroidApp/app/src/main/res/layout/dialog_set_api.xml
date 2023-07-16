@@ -3,19 +3,24 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="@drawable/border_line">
 
     <TextView
         android:id="@+id/labelTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="@android:style/TextAppearance.Large" />
+        android:textAppearance="@android:style/TextAppearance.Large"
+        android:textColor="@color/custom_yellow"/>
 
     <EditText
         android:id="@+id/hostEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="text"
+        android:textColorHint="@color/foreground"
+        android:backgroundTint="@color/custom_bright_white"
+        android:textColor="@color/custom_yellow"
         android:hint="127.0.0.1" />
 
     <EditText
@@ -23,13 +28,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="number"
+        android:textColorHint="@color/foreground"
+        android:backgroundTint="@color/custom_bright_white"
+        android:textColor="@color/custom_yellow"
         android:hint="8080" />
 
     <CheckBox
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="HTTPS"
-        android:id="@+id/httpsCheckBox" />
+        android:id="@+id/httpsCheckBox"
+        android:textColor="@color/foreground"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -42,12 +51,16 @@
             android:id="@+id/setButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:backgroundTint="@color/custom_bright_white"
+            android:textColor="@color/foreground"
             android:text="Set"/>
 
         <Button
             android:id="@+id/cancelButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:backgroundTint="@color/custom_bright_white"
+            android:textColor="@color/foreground"
             android:text="Cancel"
             android:layout_marginStart="20dp"/>
 

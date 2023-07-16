@@ -5,12 +5,14 @@
     android:id="@+id/drawerLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true">
+    android:fitsSystemWindows="true"
+    android:background="@color/background">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/scrollContainer">
+        android:id="@+id/scrollContainer"
+        android:background="@color/background">
 
         <Button
             android:id="@+id/btnOpenMenu"
@@ -20,6 +22,8 @@
             android:layout_marginEnd="8dp"
             android:layout_marginRight="8dp"
             android:text="Menu"
+            android:backgroundTint="@color/custom_bright_white"
+            android:textColor="@color/foreground"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -34,7 +38,7 @@
                 android:id="@+id/scrollView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/white">
+                android:background="@color/background">
 
                 <LinearLayout
                     android:id="@+id/feedContainer"
@@ -82,7 +86,8 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:fitsSystemWindows="true">
+        android:fitsSystemWindows="true"
+        android:background="@color/background">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -107,6 +112,7 @@
                     android:layout_height="wrap_content"
                     android:paddingStart="16dp"
                     android:text="Menu"
+                    android:textColor="@color/custom_yellow"
                     android:textSize="20sp" />
 
             </LinearLayout>
@@ -114,7 +120,8 @@
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:gravity="center">
+                android:gravity="center"
+                android:background="@color/background">
 
                 <Button
                     android:id="@+id/btnProfile"
@@ -123,6 +130,8 @@
                     android:text="Profile"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
+                    android:backgroundTint="@color/custom_bright_white"
+                    android:textColor="@color/foreground"
                     app:layout_constraintTop_toTopOf="parent" />
 
 
@@ -133,6 +142,8 @@
                     android:text="About"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
+                    android:backgroundTint="@color/custom_bright_white"
+                    android:textColor="@color/foreground"
                     app:layout_constraintTop_toBottomOf="@id/btnProfile" />
 
                 <Button
@@ -143,6 +154,8 @@
                     android:text="Logout"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
+                    android:backgroundTint="@color/custom_bright_white"
+                    android:textColor="@color/foreground"
                     app:layout_constraintStart_toStartOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
