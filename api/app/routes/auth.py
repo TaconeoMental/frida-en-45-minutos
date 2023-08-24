@@ -80,5 +80,5 @@ def handle_changepass(session):
     session.destroy()
     db.session.commit()
 
-    return utils.build_reponse(200, val_dict={"username": user.username}, msg=f"Se han actualizado los datos")
+    return session.build_reponse(200, val_dict={"username": user.username}, msg=f"Se han actualizado los datos")
 
