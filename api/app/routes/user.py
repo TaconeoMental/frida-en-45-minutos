@@ -40,7 +40,7 @@ def handle_getfeed(session):
         filters.append(Post.public == False)
     posts = Post.query.filter(or_(*filters)).order_by(Post.id.desc()).all()
 
-    dec_response = {"posts": list()}
+    dec_response = {"username": user.username, "posts": list()}
     for post in posts:
         dec_response["posts"].append({
             "author": post.user.username,
