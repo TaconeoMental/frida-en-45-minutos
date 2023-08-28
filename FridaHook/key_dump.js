@@ -1,0 +1,17 @@
+if (Java.available) {
+    Java.perform(function() {
+        console.log("");
+
+        const main_activity = Java.use("com.nivel4.fridaen45minutos.MainActivity")
+        main_activity.isRootedDevice.implementation = function() {
+            console.log("isRootedDevice returned", this.isRootedDevice());
+            return false;
+        }
+
+        const crypto = Java.use("com.nivel4.Cipher.EncryptDecrypt");
+        crypto.setSecretKey.implementation = function(key) {
+            console.log("Key: ", key);
+            return this.setSecretKey(key);
+        }
+    })
+}
