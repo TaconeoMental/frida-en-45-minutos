@@ -15,7 +15,7 @@ auth_blueprint = Blueprint('auth', __name__)
 rate_limiter = Limiter(app=app, key_func=get_remote_address)
 
 @auth_blueprint.route("/init", methods=["POST"])
-@rate_limiter.limit("10/minute")
+@rate_limiter.limit("30/minute")
 @middleware(API.HandleError)
 def handle_init():
     client_key = request_values("auth")
