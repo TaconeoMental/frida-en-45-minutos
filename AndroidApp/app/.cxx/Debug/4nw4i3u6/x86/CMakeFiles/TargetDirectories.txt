@@ -1,0 +1,3 @@
+/home/p4n/AndroidStudioProjects/fridaen45minutos/app/.cxx/Debug/4nw4i3u6/x86/CMakeFiles/native-lib.dir
+/home/p4n/AndroidStudioProjects/fridaen45minutos/app/.cxx/Debug/4nw4i3u6/x86/CMakeFiles/edit_cache.dir
+/home/p4n/AndroidStudioProjects/fridaen45minutos/app/.cxx/Debug/4nw4i3u6/x86/CMakeFiles/rebuild_cache.dir

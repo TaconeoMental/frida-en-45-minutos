@@ -1,0 +1,38 @@
+{
+  "buildFiles": [
+    "/home/p4n/AndroidStudioProjects/fridaen45minutos/app/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/home/p4n/Android/Sdk/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/home/p4n/AndroidStudioProjects/fridaen45minutos/app/.cxx/Debug/4nw4i3u6/x86_64",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/home/p4n/Android/Sdk/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/home/p4n/AndroidStudioProjects/fridaen45minutos/app/.cxx/Debug/4nw4i3u6/x86_64",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "native-lib::@6890427a1f51a3e7e1df": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "native-lib",
+      "output": "/home/p4n/AndroidStudioProjects/fridaen45minutos/app/build/intermediates/cxx/Debug/4nw4i3u6/obj/x86_64/libnative-lib.so",
+      "runtimeFiles": []
+    }
+  },
+  "toolchains": {
+    "toolchain": {
+      "cCompilerExecutable": "/home/p4n/Android/Sdk/ndk/25.1.8937393/toolchains/llvm/prebuilt/linux-x86_64/bin/clang.lld",
+      "cppCompilerExecutable": "/home/p4n/Android/Sdk/ndk/25.1.8937393/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++.lld"
+    }
+  },
+  "cFileExtensions": [
+    "c"
+  ],
+  "cppFileExtensions": []
+}

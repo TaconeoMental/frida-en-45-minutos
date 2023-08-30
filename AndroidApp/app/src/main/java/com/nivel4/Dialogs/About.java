@@ -16,6 +16,12 @@ import com.nivel4.fridaen45minutos.R;
 
 public class About extends DialogFragment {
 
+    private native String nativeText(String input); // Native JNI function declaration
+
+    static {
+        System.loadLibrary("native-lib"); // Load the JNI library
+    }
+
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
@@ -28,8 +34,10 @@ public class About extends DialogFragment {
         Button closeButton = view.findViewById(R.id.closeButton);
 
         labelTextView.setText("Frida en 45 minutos");
-        String about = "Developed by p4ncontomat3 and 1nh4l3r\n\n\nHappy hooking <3";
-        aboutTextView.setText(about);
+
+        String aboutText = nativeText(aboutText())+"\n\n\nHappy Hooking <3";
+        aboutTextView.setText(aboutText);
+
         closeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -41,5 +49,8 @@ public class About extends DialogFragment {
         return builder.create();
     }
 
-
+    public static String aboutText(){
+        String about = "yes";
+        return about;
+    }
 }

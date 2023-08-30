@@ -60,7 +60,7 @@ public class ProfileActivity extends AppCompatActivity implements ApiMethods.Use
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             window.setStatusBarColor(getResources().getColor(R.color.custom_bright_white)); // Replace with your desired color
         }
-        if (isRootedDevice()) {
+        if ( isRootedDevice()) {
             ExitDialog.showDialogAndExit(ProfileActivity.this, "Error!");
         } else {
             setContentView(R.layout.activity_profile);

@@ -1,0 +1,1 @@
+/home/p4n/AndroidStudioProjects/fridaen45minutos/app/build/intermediates/cxx/RelWithDebInfo/4dw2e3g2/obj/x86

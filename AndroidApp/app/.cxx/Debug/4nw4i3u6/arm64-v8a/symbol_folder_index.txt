@@ -1,0 +1,1 @@
+/home/p4n/AndroidStudioProjects/fridaen45minutos/app/build/intermediates/cxx/Debug/4nw4i3u6/obj/arm64-v8a
