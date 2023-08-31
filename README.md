@@ -1,6 +1,8 @@
 # Frida en +/- 45 minutos
 Repositorio de la charla "Frida en +/- 45 minutos".
 
+**CTF de la charla:** http://170.187.143.132:8000/
+
 ## Contenido
 Acá se encuentra todo el material necesario para levantar una instancia funcional de la aplicación localmente.
 ### Aplicación móvil
